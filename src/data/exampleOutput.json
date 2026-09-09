@@ -1,0 +1,134 @@
+{
+  "tripSummary": {
+    "city": "Vijayawada",
+    "numberOfDays": 2,
+    "hoursPerDay": 8,
+    "intro": "A relaxed 2-day history trail through Vijayawada, covering caves, a hill fort, and an ancient Buddhist stupa.",
+    "warnings": []
+  },
+  "hotelRecommendation": {
+    "hotelId": 103,
+    "name": "Budget Stay Vijayawada",
+    "pricePerNight": 1800,
+    "rating": 3.9,
+    "amenities": [
+      "WiFi",
+      "Parking"
+    ],
+    "reason": "Budget Stay Vijayawada sits closest to your selected destinations overall (about 16.6 km away on average), which keeps daily travel time down compared to the other options.",
+    "alternatives": [
+      {
+        "hotelId": 101,
+        "name": "Krishna Riverside Inn"
+      },
+      {
+        "hotelId": 102,
+        "name": "Grand Vijayawada Palace"
+      }
+    ]
+  },
+  "days": [
+    {
+      "day": 1,
+      "title": "Caves and river views",
+      "activities": [
+        {
+          "startTime": "09:00",
+          "endTime": "09:30",
+          "type": "meal",
+          "title": "Breakfast"
+        },
+        {
+          "startTime": "09:30",
+          "endTime": "09:45",
+          "type": "travel",
+          "from": "Budget Stay Vijayawada",
+          "to": "Undavalli Caves",
+          "distanceKm": 7.8,
+          "distanceEstimated": true
+        },
+        {
+          "startTime": "09:45",
+          "endTime": "11:45",
+          "type": "destination",
+          "destinationId": 1,
+          "title": "Explore Undavalli Caves"
+        },
+        {
+          "startTime": "11:45",
+          "endTime": "12:45",
+          "type": "meal",
+          "title": "Lunch"
+        },
+        {
+          "startTime": "12:45",
+          "endTime": "13:00",
+          "type": "travel",
+          "from": "Undavalli Caves",
+          "to": "Budget Stay Vijayawada",
+          "distanceKm": 7.8,
+          "distanceEstimated": true
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "title": "Fort and ancient stupa",
+      "activities": [
+        {
+          "startTime": "09:00",
+          "endTime": "09:30",
+          "type": "meal",
+          "title": "Breakfast"
+        },
+        {
+          "startTime": "09:30",
+          "endTime": "09:57",
+          "type": "travel",
+          "from": "Budget Stay Vijayawada",
+          "to": "Amaravati Stupa",
+          "distanceKm": 18,
+          "distanceEstimated": false
+        },
+        {
+          "startTime": "09:57",
+          "endTime": "11:57",
+          "type": "destination",
+          "destinationId": 3,
+          "title": "Explore Amaravati Stupa"
+        },
+        {
+          "startTime": "11:57",
+          "endTime": "12:42",
+          "type": "travel",
+          "from": "Amaravati Stupa",
+          "to": "Kondapalli Fort",
+          "distanceKm": 30,
+          "distanceEstimated": false
+        },
+        {
+          "startTime": "12:42",
+          "endTime": "13:42",
+          "type": "meal",
+          "title": "Lunch"
+        },
+        {
+          "startTime": "13:42",
+          "endTime": "15:42",
+          "type": "destination",
+          "destinationId": 2,
+          "title": "Explore Kondapalli Fort"
+        },
+        {
+          "startTime": "15:42",
+          "endTime": "16:27",
+          "type": "travel",
+          "from": "Kondapalli Fort",
+          "to": "Budget Stay Vijayawada",
+          "distanceKm": 30,
+          "distanceEstimated": true
+        }
+      ]
+    }
+  ]
+}

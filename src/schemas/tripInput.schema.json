@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WayfareTripInput",
+  "description": "Structured JSON handed off from the Trip Feasibility Engine to the AI Planner. feasibility.feasible must be true -- the planner refuses to run otherwise.",
+  "type": "object",
+  "required": ["trip", "destinations", "feasibility", "hotels"],
+  "properties": {
+    "trip": {
+      "type": "object",
+      "required": ["city", "numberOfDays", "hoursPerDay"],
+      "properties": {
+        "city": { "type": "string" },
+        "numberOfDays": { "type": "integer", "minimum": 1 },
+        "hoursPerDay": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "destinations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "latitude", "longitude", "visitDurationHours"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "latitude": { "type": "number" },
+          "longitude": { "type": "number" },
+          "visitDurationHours": { "type": "number", "exclusiveMinimum": 0 },
+          "category": { "type": "string" },
+          "description": { "type": "string" },
+          "imageUrl": { "type": "string" }
+        }
+      }
+    },
+    "route": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "distanceKm"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "distanceKm": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "feasibility": {
+      "type": "object",
+      "required": ["feasible"],
+      "properties": {
+        "feasible": { "type": "boolean" },
+        "estimatedRequiredHours": { "type": "number" },
+        "availableHours": { "type": "number" }
+      }
+    },
+    "hotels": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "latitude", "longitude", "pricePerNight", "rating"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "latitude": { "type": "number" },
+          "longitude": { "type": "number" },
+          "pricePerNight": { "type": "number", "minimum": 0 },
+          "rating": { "type": "number", "minimum": 0, "maximum": 5 },
+          "amenities": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "preferences": {
+      "type": "object",
+      "description": "Optional. Any subset of these may be present.",
+      "properties": {
+        "budget": { "type": "string", "enum": ["budget", "mid-range", "luxury"] },
+        "maxBudgetPerNight": { "type": "number" },
+        "interests": { "type": "array", "items": { "type": "string" } },
+        "foodPreferences": { "type": "array", "items": { "type": "string" } },
+        "mustHaveAmenities": { "type": "array", "items": { "type": "string" } },
+        "travelStyle": { "type": "string", "enum": ["relaxed", "balanced", "adventure-heavy"] },
+        "groupType": { "type": "string", "enum": ["solo", "couple", "family", "group"] },
+        "preferredTransportation": { "type": "string" }
+      }
+    }
+  }
+}

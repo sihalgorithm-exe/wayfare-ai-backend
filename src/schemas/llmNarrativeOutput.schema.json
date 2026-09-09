@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WayfareLLMNarrativeOutput",
+  "description": "The ONLY shape the LLM is allowed to return. Deliberately narrow -- no numbers, ids, times or distances -- so a malformed or hallucinated response can never corrupt the deterministic itinerary it gets merged into.",
+  "type": "object",
+  "required": ["hotelReason", "tripIntro", "dayTitles"],
+  "additionalProperties": false,
+  "properties": {
+    "hotelReason": { "type": "string", "minLength": 1, "maxLength": 400 },
+    "tripIntro": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "dayTitles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["day", "title"],
+        "additionalProperties": false,
+        "properties": {
+          "day": { "type": "number" },
+          "title": { "type": "string", "minLength": 1, "maxLength": 60 }
+        }
+      }
+    }
+  }
+}

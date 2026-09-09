@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WayfarePlannerOutput",
+  "description": "What the AI Planner API returns to the frontend. Every number in here traces back to supplied input data or deterministic computation -- never to the LLM.",
+  "type": "object",
+  "required": ["tripSummary", "hotelRecommendation", "days"],
+  "properties": {
+    "tripSummary": {
+      "type": "object",
+      "properties": {
+        "city": { "type": "string" },
+        "numberOfDays": { "type": "integer" },
+        "hoursPerDay": { "type": "number" },
+        "intro": { "type": "string" },
+        "warnings": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "hotelRecommendation": {
+      "type": "object",
+      "required": ["hotelId", "name", "reason"],
+      "properties": {
+        "hotelId": { "type": "integer" },
+        "name": { "type": "string" },
+        "pricePerNight": { "type": "number" },
+        "rating": { "type": "number" },
+        "amenities": { "type": "array", "items": { "type": "string" } },
+        "reason": { "type": "string" },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hotelId": { "type": "integer" },
+              "name": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "days": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["day", "title", "activities"],
+        "properties": {
+          "day": { "type": "integer" },
+          "title": { "type": "string" },
+          "activities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["startTime", "endTime", "type"],
+              "properties": {
+                "startTime": { "type": "string" },
+                "endTime": { "type": "string" },
+                "type": { "type": "string", "enum": ["meal", "travel", "destination"] },
+                "title": { "type": "string" },
+                "from": { "type": "string" },
+                "to": { "type": "string" },
+                "distanceKm": { "type": ["number", "null"] },
+                "distanceEstimated": { "type": "boolean" },
+                "destinationId": { "type": "integer" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
