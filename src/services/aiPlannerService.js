@@ -10,7 +10,7 @@ import { checkNarrative, checkPlannerOutput } from '../validators/validateOutput
 // swapping the LLM provider, tweaking hotel weights, or changing the day-split
 // heuristic never has to touch routes/ or the frontend contract.
 export async function planTrip(tripInput) {
-  const { trip, destinations, hotels, preferences, feasibility } = tripInput;
+  const { trip, destinations, hotels, preferences, feasibility, budget } = tripInput;
 
   if (!feasibility?.feasible) {
     const err = new Error('Trip is not feasible');
@@ -20,8 +20,36 @@ export async function planTrip(tripInput) {
     throw err;
   }
 
+  // Budget is optional. When present, derive a per-night ceiling from the
+  // WORST-CASE remaining budget (the more conservative of the two bounds)
+  // divided across nights, and feed that into hotel scoring as a real
+  // constraint rather than a vague preset.
+  const nights = Math.max(1, (trip.numberOfDays || 1) - 1);
+  const effectivePreferences = { ...preferences };
+  let budgetStatus = null;
+
+  if (budget && budget.valid) {
+    const worstCaseRemaining = budget.remainingBudget.min;
+    const maxBudgetPerNight = worstCaseRemaining / nights;
+    effectivePreferences.maxBudgetPerNight = maxBudgetPerNight;
+
+    const cheapestHotelPrice = hotels.length
+      ? Math.min(...hotels.map((h) => h.pricePerNight))
+      : null;
+
+    if (cheapestHotelPrice !== null && cheapestHotelPrice > maxBudgetPerNight) {
+      const shortfallPerNight = Math.round(cheapestHotelPrice - maxBudgetPerNight);
+      budgetStatus = {
+        status: 'insufficient',
+        message: `Even the most affordable available hotel is about ₹${shortfallPerNight} more per night than your remaining budget allows. Consider increasing your total budget by roughly ₹${shortfallPerNight * nights} or choosing fewer/closer destinations.`,
+      };
+    } else {
+      budgetStatus = { status: 'ok', message: null };
+    }
+  }
+
   // 1. Hotel scoring (needs only destinations, not order/timetable).
-  const rankedHotels = scoreHotels(hotels, destinations, preferences);
+  const rankedHotels = scoreHotels(hotels, destinations, effectivePreferences);
 
   // "Change Hotel" support: if the frontend passed a specific hotel the user
   // picked (see routes/planner.routes.js + ControlsBar.jsx), honour it as the
@@ -58,9 +86,13 @@ export async function planTrip(tripInput) {
   }));
 
   // 5. Narration from the LLM -- narrow, validated, with a safe fallback.
-  const narrative = await getNarrative({ trip, preferences, topHotel, days });
+  const narrative = await getNarrative({ trip, preferences, topHotel, days, budget, budgetStatus });
 
   // 6. Assemble the response the frontend actually renders.
+  if (budgetStatus?.status === 'insufficient') {
+    warnings.push(budgetStatus.message);
+  }
+
   const output = {
     tripSummary: {
       city: trip.city,
@@ -68,6 +100,12 @@ export async function planTrip(tripInput) {
       hoursPerDay: trip.hoursPerDay,
       intro: narrative.tripIntro,
       warnings,
+      budget: budget && budget.valid ? {
+        totalBudget: budget.totalBudget,
+        estimatedTravelCost: budget.estimatedTravelCost,
+        remainingBudget: budget.remainingBudget,
+        status: budgetStatus?.status || 'ok',
+      } : null,
     },
     hotelRecommendation: topHotel && {
       hotelId: topHotel.hotel.id,
@@ -109,13 +147,13 @@ export function rankHotels(tripInput) {
   }));
 }
 
-async function getNarrative({ trip, preferences, topHotel, days }) {
+async function getNarrative({ trip, preferences, topHotel, days, budget, budgetStatus }) {
   const fallback = buildFallbackNarrative({ trip, topHotel, days });
   try {
     const provider = getProvider();
     const raw = await provider.complete(
       buildNarrativeSystemPrompt(),
-      buildNarrativeUserPrompt({ trip, preferences, topHotel, days })
+      buildNarrativeUserPrompt({ trip, preferences, topHotel, days, budget, budgetStatus })
     );
     const { ok, data, errors } = checkNarrative(raw);
     if (!ok) {

@@ -26,13 +26,21 @@ export function buildNarrativeSystemPrompt() {
   ].join('\n');
 }
 
-export function buildNarrativeUserPrompt({ trip, preferences, topHotel, days }) {
+export function buildNarrativeUserPrompt({ trip, preferences, topHotel, days, budget, budgetStatus }) {
   const payload = {
     trip: {
       city: trip.city,
       numberOfDays: trip.numberOfDays,
       hoursPerDay: trip.hoursPerDay,
     },
+    // Already-computed facts, never to be recalculated or second-guessed
+    // by the model - include only if the user actually provided a budget.
+    budget: budget && budget.valid ? {
+      totalBudget: budget.totalBudget,
+      estimatedTravelCost: budget.estimatedTravelCost,
+      remainingBudget: budget.remainingBudget,
+      status: budgetStatus?.status || 'ok',
+    } : null,
     preferences: preferences || {},
     recommendedHotel: topHotel && {
       name: topHotel.hotel.name,
@@ -82,7 +90,11 @@ export function buildNarrativeUserPrompt({ trip, preferences, topHotel, days }) 
     '',
     '- hotelReason: 1-2 sentences on why the recommended hotel fits this specific trip.',
     '- tripIntro: 1 friendly sentence introducing the plan (mention the city and day count).',
-    '- dayTitles: a short (3-5 word) theme title for each day, based on the categories of',
-    '  that day\'s destinations (e.g. "Temples and river views").',
+        '- dayTitles: a short (3-5 word) theme title for each day, based on the categories of',
+    ' the destinations of that day (e.g. \"Temples and river views\").',
+    '- If budget.status is "insufficient", tripIntro should gently acknowledge that budget is',
+    '  tight for this plan, without inventing a specific alternative price - that figure is',
+    '  already provided separately to the user.',
   ].join('\n');
 }
+

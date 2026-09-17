@@ -12,7 +12,16 @@
         "numberOfDays": { "type": "integer" },
         "hoursPerDay": { "type": "number" },
         "intro": { "type": "string" },
-        "warnings": { "type": "array", "items": { "type": "string" } }
+        "warnings": { "type": "array", "items": { "type": "string" } },
+        "budget": {
+          "type": ["object", "null"],
+          "properties": {
+            "totalBudget": { "type": "number" },
+            "estimatedTravelCost": { "type": "object" },
+            "remainingBudget": { "type": "object" },
+            "status": { "type": "string", "enum": ["ok", "insufficient"] }
+          }
+        }
       }
     },
     "hotelRecommendation": {

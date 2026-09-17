@@ -37,7 +37,13 @@ export function scoreHotels(hotels, destinations, preferences = {}, weights = DE
 
     const locationScore = 1 - avgDistKm / maxAvgDist; // closer to destinations, on average, is better
     const routeScore = 1 - farthestDestKm / maxAvgDist; // no single destination is a long detour
-    const priceScore = priceCompatibility(hotel.pricePerNight, minPrice, maxPrice, preferences.budget);
+    const priceScore = priceCompatibility(
+      hotel.pricePerNight,
+      minPrice,
+      maxPrice,
+      preferences.budget,
+      preferences.maxBudgetPerNight
+    );
     const ratingScore = clamp01(hotel.rating / 5);
     const amenitiesScore = amenitiesMatch(hotel.amenities, preferences.mustHaveAmenities);
     const preferenceScore = preferenceMatch(hotel, preferences);
@@ -83,12 +89,21 @@ function maxDistanceToDestinations(hotel, destinations) {
   return Math.max(...destinations.map((d) => haversineKm(hotel, d)));
 }
 
-function priceCompatibility(price, min, max, budgetPreference) {
+function priceCompatibility(price, min, max, budgetPreference, maxBudgetPerNight) {
+  // A real, computed per-night ceiling (derived from the user's total trip
+  // budget minus estimated travel) takes priority over the vaguer
+  // budget/mid-range/luxury preset - a hotel over the ceiling is heavily
+  // penalised rather than just scored a bit lower, since recommending it
+  // would mean presenting a plan as budget-compliant when it isn't.
+  if (typeof maxBudgetPerNight === 'number' && Number.isFinite(maxBudgetPerNight)) {
+    if (price <= maxBudgetPerNight) return 1;
+    const overBy = (price - maxBudgetPerNight) / maxBudgetPerNight;
+    return clamp01(1 - overBy * 2); // scales to 0 quickly past the ceiling
+  }
+
   if (max === min) return 1;
   const normalized = 1 - (price - min) / (max - min); // cheaper -> higher score by default
   if (budgetPreference === 'luxury') {
-    // Invert: for a stated luxury preference, higher price within the
-    // supplied set is treated as more compatible, not penalised.
     return 1 - normalized;
   }
   return clamp01(normalized);
